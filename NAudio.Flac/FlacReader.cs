@@ -12,7 +12,7 @@ namespace NAudio.Flac
     /// <summary>
     ///     Provides a decoder for decoding flac (Free Lostless Audio Codec) data.
     /// </summary>
-    public class FlacReader : WaveStream, IDisposable, ISampleProvider, IWaveProvider
+    public class FlacReader : WaveStream, IDisposable, IWaveProvider
     
     {
         private readonly Stream _stream;
@@ -152,6 +152,11 @@ namespace NAudio.Flac
             }
         }
 
+        public override int Read(byte[] buffer, int offset, int count)
+        {
+            throw new NotImplementedException();
+        }
+
         /// <summary>
         ///     Reads a sequence of bytes from the <see cref="FlacReader" /> and advances the position within the stream by the
         ///     number of bytes read.
@@ -167,8 +172,11 @@ namespace NAudio.Flac
         /// </param>
         /// <param name="count">The maximum number of bytes to read from the current source.</param>
         /// <returns>The total number of bytes read into the buffer.</returns>
-        public override int Read(byte[] buffer, int offset, int count)
+        public override int Read(Span<byte> buffer)
         {
+            var offset = 0;
+            var count = buffer.Length;
+            
             int read = 0;
             count -= (count % WaveFormat.BlockAlign);
 
@@ -195,7 +203,7 @@ namespace NAudio.Flac
 
                     int bufferlength = frame.GetBuffer(ref _overflowBuffer, 0);
                     int bytesToCopy = Math.Min(count - read, bufferlength);
-                    Array.Copy(_overflowBuffer, 0, buffer, offset, bytesToCopy);
+                    _overflowBuffer.AsSpan(0, bytesToCopy).CopyTo(buffer.Slice(offset, bytesToCopy));
                     read += bytesToCopy;
                     offset += bytesToCopy;
 
@@ -210,12 +218,12 @@ namespace NAudio.Flac
             return read;
         }
 
-        private int GetOverflows(byte[] buffer, ref int offset, int count)
+        private int GetOverflows(Span<byte> buffer, ref int offset, int count)
         {
             if (_overflowCount != 0 && _overflowBuffer != null && count > 0)
             {
                 int bytesToCopy = Math.Min(count, _overflowCount);
-                Array.Copy(_overflowBuffer, _overflowOffset, buffer, offset, bytesToCopy);
+                _overflowBuffer.AsSpan(_overflowOffset, bytesToCopy).CopyTo(buffer.Slice(offset, bytesToCopy));
 
                 _overflowCount -= bytesToCopy;
                 _overflowOffset += bytesToCopy;
@@ -324,11 +332,6 @@ namespace NAudio.Flac
         ~FlacReader()
         {
             Dispose(false);
-        }
-
-        public int Read(float[] buffer, int offset, int count)
-        {
-            return -1;
         }
 
     }

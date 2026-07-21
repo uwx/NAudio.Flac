@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFrameworks>netcoreapp3.1;net472;net6.0;net6.0-windows;net8.0-windows;net9.0-windows</TargetFrameworks>
+		<TargetFramework>net10.0</TargetFramework>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
 	</PropertyGroup>
@@ -20,7 +20,7 @@
 		<PackageId>NAudio.Flac.Unknown</PackageId>
 	</PropertyGroup>
 	<ItemGroup>
-		<PackageReference Include="NAudio" Version="2.2.1" />
+		<PackageReference Include="NAudio" Version="3.0.0-preview.18" />
 	</ItemGroup>
 	<ItemGroup>
 		<None Include="..\Flac_logo.png">
